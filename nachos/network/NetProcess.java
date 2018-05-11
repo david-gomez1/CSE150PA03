@@ -61,7 +61,33 @@ public class NetProcess extends /*VMProcess*/ UserProcess {
     	if(host < 0 || port < 0) {
     		return -1;
     	}
-    	acknowledge();
+    	int srcLink = Machine.networkLink().getLinkAddress();
+    	
+    	int srcPort = NetKernel.postOffice.findAvailablePort();
+    	
+    	Socket socket = new Socket(host, port, srcLink, srcPort);
+    	
+    	int fileDescriptor = -1;
+    	
+    	for(int i = 2; i < myFileList.length; i++){
+    		if(myFileList[i] == null){
+    			myFileList[i] = socket;
+    			fileDescriptor = i;
+    			break;
+    		}
+    	}
+    	
+    	try{
+    		NetMessage message = new NetMessage(host, port, srcLink, srcPort, 1, 0, new byte[0]);
+    		NetKernel.postOffice.send(message);
+    	} catch(MalformedPacketException e) {
+                 System.out.println("malformed packed exception");
+                 Lib.assertNotReached();
+                 return -1;
+             }
+    	
+    	NetMessage acknowledgement = NetKernel.postOffice.receive(srcPort);
+    	
     	return fileDescriptor;
 
 
@@ -89,6 +115,42 @@ public class NetProcess extends /*VMProcess*/ UserProcess {
     	if(port < 0){
     		return -1;
     	}
+    	
+    	NetMessage message = NetKernel.postOffice.receive(port);
+    	if(message == null){
+    		return -1;
+    	}
+    	
+    	int dstLink = message.packet.srcLink;
+    	int srcLink = Machine.networkLink().getLinkAddress();
+        int dstPort = message.srcPort;
+        Socket socket = new Socket(dstLink, dstPort, srcLink, port);
+        NetKernel.postOffice.markPortAsUsed(port);
+        int i;
+        for(i = 2; i < myFileList.length; i ++)
+        {
+                if (myFileList[i] == null) {
+                	myFileList[i] = socket;
+                break;
+            }
+           
+        }
+        try {
+                NetMessage acknowledgement = new NetMessage(dstLink, dstPort, srcLink, port,  3, 0, new byte[0]);
+                NetKernel.postOffice.send(acknowledgement);
+        } catch(MalformedPacketException e) {
+                System.out.println("malformed packed exception");
+                Lib.assertNotReached();
+                return -1;
+            }
+
+            return i;
+            
+
+        }
+    	/*
+    	
+    	
     	Packet tmpPacket = receiveQueue.pop();
     	//tmpPacket.
     	if(tmpPacket.size() < availableSpace){ 
@@ -98,7 +160,7 @@ public class NetProcess extends /*VMProcess*/ UserProcess {
     		acknowledge();
     	}
     	int fileDescriptor = connect(host, port);
-    	return fileDescriptor;
-    }
+    	return fileDescriptor;*/
+    //}
     
 }

@@ -982,7 +982,7 @@ public class UserProcess {
 	private static final int pageSize = Processor.pageSize;
 	private static final char dbgProcess = 'a';
 
-	OpenFile[] myFileList;
+	public OpenFile[] myFileList;
 	OpenFile stdin;
 	OpenFile stdout;
 
