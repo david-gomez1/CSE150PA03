@@ -9,7 +9,8 @@ import java.util.Arrays;
  *
  * @see	nachos.machine.Packet
  */
-public class NetMessage {
+public class NetMessage 
+{
     /**
      * Allocate a new mail message to be sent, using the specified parameters.
      *
@@ -20,15 +21,17 @@ public class NetMessage {
      * @param	contents	the contents of the packet.
      */
     public NetMessage(int dstLink, int dstPort, int srcLink, int srcPort,
-		       int status, int seqNum, byte[] contents) throws MalformedPacketException {
-    	// make sure the paramters are valid
-    	if (dstPort < 0 || dstPort >= portLimit ||
-    	    srcPort < 0 || srcPort >= portLimit ||
-    	    status < 0 || status >= maxStatus ||
-    	    seqNum < 0 || seqNum >= maxSeqNum ||
+		       int status, int seqNum, byte[] contents) throws MalformedPacketException 
+    {
+   
+    	if (dstPort < 0 || dstPort >= portLimit ||	//
+    	    srcPort < 0 || srcPort >= portLimit ||	// these make sure the ports are in a valid range
+    	    status < 0 || status >= maxStatus ||	// makes sure the bits are between 0 and 16
+    	    seqNum < 0 || seqNum >= maxSeqNum ||	// 
     	    contents.length > maxContentsLength)
-	    throw new MalformedPacketException();
+	    	throw new MalformedPacketException();
 	
+	// sets the bytes of each of the parameters 
     	this.dstPort = (byte) dstPort;
     	this.srcPort = (byte) srcPort;
     	this.status = (byte) status;
@@ -36,6 +39,7 @@ public class NetMessage {
     	this.seqNum = seqNum;
     	this.contents = contents;
 
+	// an array of the packetConents to fill with the parameters size
     	byte[] packetContents = new byte[headerLength + contents.length];
 
     	packetContents[0] = (byte) dstPort;
@@ -55,17 +59,17 @@ public class NetMessage {
      *
      * @param	packet	the packet containg the mail message.
      */
-    public NetMessage(Packet packet) throws MalformedPacketException {
+    public NetMessage(Packet packet) throws MalformedPacketException 
+    {
 	   this.packet = packet;
 
-    	// make sure we have a valid header
-    	if (packet.contents.length < headerLength ||
-    	    packet.contents[0] < 0 || packet.contents[0] >= portLimit ||
-    	    packet.contents[1] < 0 || packet.contents[1] >= portLimit ||
-    	    packet.contents[3] < 0 || packet.contents[3] >= maxStatus ||
+    	if (packet.contents.length < headerLength ||	// makes sure the header is valid and within its max length
+    	    packet.contents[0] < 0 || packet.contents[0] >= portLimit ||	// these make sure the packet contents from
+    	    packet.contents[1] < 0 || packet.contents[1] >= portLimit ||	// the network are valid to create the mail 
+    	    packet.contents[3] < 0 || packet.contents[3] >= maxStatus ||	// message
     	    Lib.bytesToInt(Arrays.copyOfRange(packet.contents, 4, 8), 0) < 0 ||
     	    Lib.bytesToInt(Arrays.copyOfRange(packet.contents, 4, 8), 0) >= maxSeqNum)
-    	    throw new MalformedPacketException();
+    	    	throw new MalformedPacketException();
 
     	dstPort = packet.contents[0];
     	srcPort = packet.contents[1];
@@ -80,7 +84,8 @@ public class NetMessage {
     /**
      * Return a string representation of the message headers.
      */
-    public String toString() {
+    public String toString() 
+    {
 	return "from (" + packet.srcLink + ":" + srcPort +
 	    ") to (" + packet.dstLink + ":" + dstPort +
 	    "), " + contents.length + " bytes";
